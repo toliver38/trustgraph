@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+
+from simple_term_menu import TerminalMenu
+
+
+def describe_llm(option):
+    return {
+        "Azure": """LLM endpoint hosted on Azure.
+
+The large language model (LLM) tool in prompt flow enables you to take advantage of widely used large language models like OpenAI, Azure OpenAI Service, or any language model supported by the Azure AI model inference API for natural language processing.7 days ago""",
+        "AWS Bedrock": ""
+    }.get(option, "No documentation on {option}")
+
+def list_llms():
+    return [
+        "[a] Azure",
+        "[b] AWS Bedrock",
+        "[c] Anthropic Claude",
+        "[h] Cohere",
+        "[g] Google Cloud VertexAI",
+    ]
+
+def main():
+    terminal_menu = TerminalMenu(
+        list_llms(),
+        preview_command=describe_llm, preview_size=0.5)
+
+    ix = terminal_menu.show()
+
+    print(ix)
+
+
+if __name__ == "__main__":
+    main()
+
