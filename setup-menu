@@ -1,6 +1,46 @@
 #!/usr/bin/env python3
 
+import _jsonnet as j
+import logging
+import os
 from simple_term_menu import TerminalMenu
+import json
+
+logger = logging.getLogger("setup-menu")
+logger.setLevel(logging.INFO)
+
+jsonnet_base = "templates/"
+
+def process_jsonnet(config):
+
+    res = j.evaluate_snippet("config", config, import_callback=load)
+    return json.loads(res)
+
+def load(dir, filename):
+
+    logger.debug("Request jsonnet: %s %s", dir, filename)
+
+    if filename == "svr-config.jsonnetFIXMENOETUE":
+        logger.debug("Handled internally")
+        return filename, config.encode("utf-8")
+
+    try:
+        if dir:
+            path = os.path.join(".", dir, filename)
+        else:
+            path = os.path.join(jsonnet_base, filename)
+
+        logger.debug("Try: %s", path)
+        with open(path, "rb") as f:
+            logger.debug("Loaded: %s", path)
+            return str(path), f.read()
+
+    except:
+        path = os.path.join(jsonnet_base, filename)
+        logger.debug("Try: %s", path)
+        with open(path, "rb") as f:
+            logger.debug("Loaded: %s", path)
+            return str(path), f.read()
 
 llms = [
     ("a", "azure", "Azure",
@@ -28,6 +68,14 @@ trustworthy and reliable AI available."""),
     ("h", "cohere", "Cohere",
      """Cohere Command R is a family of highly scalable language models that balance
 high performance with strong accuracy."""),
+    ("o", "ollama", "Ollama",
+     """Ollama is an open-source project that serves as a powerful and user-friendly
+platform for running LLMs on your local machine. It acts as a bridge between
+the complexities of LLM technology and the desire for an accessible and
+customizable AI experience.
+
+To use Ollama you will need to have an Ollama service running already, and
+have it loaded with the LLM you wish to use."""),
     ("v", "vertexai", "VertexAI",
      """Vertex AI is a machine learning (ML) platform that lets you train and deploy
 ML models and AI applications, and customize large language models (LLMs)
@@ -146,7 +194,6 @@ def main():
 
     print()
     print(f"Selected: {chunkers[ix][2]}")
-    print()
 
     print()
     print("Select a vector store...")
@@ -163,7 +210,6 @@ def main():
 
     print()
     print(f"Selected: {vectors[ix][2]}")
-    print()
 
     print()
     print("Select a triple store...")
@@ -182,7 +228,24 @@ def main():
     print(f"Selected: {triples[ix][2]}")
     print()
 
+    config = f"""
+local triple = import "components/{triple}.jsonnet";
+local pulsar = import "components/pulsar.jsonnet";
+local vector = import "components/{vector}.jsonnet";
+local grafana = import "components/grafana.jsonnet";
+local trustgraph = import "components/trustgraph.jsonnet";
+local ai = import "components/{llm}.jsonnet";
 
+local config = triple + pulsar + vector + grafana + trustgraph + ai;
+
+std.manifestYamlDoc(config)
+"""
+
+    print(config)
+
+    resp = process_jsonnet(config)
+
+    print(resp)
 
 if __name__ == "__main__":
     main()
