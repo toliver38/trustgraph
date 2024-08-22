@@ -9,47 +9,84 @@ import json
 logger = logging.getLogger("setup-menu")
 logger.setLevel(logging.INFO)
 
-jsonnet_base = "templates/"
+class Generator:
 
-def process_jsonnet(config):
+    def __init__(self, base="templates/"):
+        self.jsonnet_base = base
 
-    res = j.evaluate_snippet("config", config, import_callback=load)
-    return json.loads(res)
+    def process_jsonnet(self, config):
 
-def load(dir, filename):
+        res = j.evaluate_snippet("config", config, import_callback=self.load)
+        return json.loads(res)
 
-    logger.debug("Request jsonnet: %s %s", dir, filename)
+    def load(self, dir, filename):
 
-    if filename == "svr-config.jsonnetFIXMENOETUE":
-        logger.debug("Handled internally")
-        return filename, config.encode("utf-8")
+        logger.debug("Request jsonnet: %s %s", dir, filename)
 
-    try:
-        if dir:
-            path = os.path.join(".", dir, filename)
-        else:
-            path = os.path.join(jsonnet_base, filename)
+        try:
+            if dir:
+                path = os.path.join(".", dir, filename)
+            else:
+                path = os.path.join(self.jsonnet_base, filename)
 
-        logger.debug("Try: %s", path)
-        with open(path, "rb") as f:
-            logger.debug("Loaded: %s", path)
-            return str(path), f.read()
+            logger.debug("Try: %s", path)
+            with open(path, "rb") as f:
+                logger.debug("Loaded: %s", path)
+                return str(path), f.read()
 
-    except:
-        path = os.path.join(jsonnet_base, filename)
-        logger.debug("Try: %s", path)
-        with open(path, "rb") as f:
-            logger.debug("Loaded: %s", path)
-            return str(path), f.read()
+        except:
+            path = os.path.join(self.jsonnet_base, filename)
+            logger.debug("Try: %s", path)
+            with open(path, "rb") as f:
+                logger.debug("Loaded: %s", path)
+                return str(path), f.read()
 
-llms = [
-    ("a", "azure", "Azure",
-     """The large language model (LLM) tool in prompt flow enables you to take
+class Chooser:
+
+    def describe(self, option):
+        for opt in self.options:
+            if option == opt[2]: return opt[3]
+        return "No documentation on {option}"
+
+    def list(self):
+        return [
+            f"[{opt[0]}] {opt[2]}"
+            for opt in self.options
+        ]
+
+    def choose(self):
+        print()
+        print(self.prompt)
+        
+        menu = TerminalMenu(
+            self.list(),
+            preview_command=self.describe,
+            preview_size=0.5,
+            preview_title="description",
+        )
+
+        ix = menu.show()
+
+        selection = self.options[ix][1]
+
+        print()
+        print(f"Selected: {self.options[ix][2]}")
+
+        return selection
+    
+class Llms(Chooser):
+
+    def __init__(self):
+        self.prompt = "Select an LLM..."
+
+        self.options = [
+            ("a", "azure", "Azure",
+             """The large language model (LLM) tool in prompt flow enables you to take
 advantage of widely used large language models like OpenAI, Azure OpenAI
 Service, or any language model supported by the Azure AI model inference
 API for natural language processing."""),
-    ("b", "bedrock", "AWS Bedrock",
-     """Amazon Bedrock is a fully managed service that offers a choice of
+            ("b", "bedrock", "AWS Bedrock",
+             """Amazon Bedrock is a fully managed service that offers a choice of
 high-performing foundation models (FMs) from leading AI companies like AI21
 Labs, Anthropic, Cohere, Meta, Mistral AI, Stability AI, and Amazon through
 a single API, along with a broad set of capabilities you need to build
@@ -61,172 +98,86 @@ execute tasks using your enterprise systems and data sources. Since Amazon
 Bedrock is serverless, you don't have to manage any infrastructure, and you
 can securely integrate and deploy generative AI capabilities into your
 applications using the AWS services you are already familiar with."""),
-    ("c", "claude", "Anthropic Claude",
-     """Claude is a family of highly performant and intelligent AI models built by
+            ("c", "claude", "Anthropic Claude",
+             """Claude is a family of highly performant and intelligent AI models built by
 Anthropic. While Claude is powerful and extensible, it's also the most
 trustworthy and reliable AI available."""),
-    ("h", "cohere", "Cohere",
-     """Cohere Command R is a family of highly scalable language models that balance
+            ("h", "cohere", "Cohere",
+             """Cohere Command R is a family of highly scalable language models that balance
 high performance with strong accuracy."""),
-    ("o", "ollama", "Ollama",
-     """Ollama is an open-source project that serves as a powerful and user-friendly
+            ("o", "ollama", "Ollama",
+             """Ollama is an open-source project that serves as a powerful and user-friendly
 platform for running LLMs on your local machine. It acts as a bridge between
 the complexities of LLM technology and the desire for an accessible and
 customizable AI experience.
 
 To use Ollama you will need to have an Ollama service running already, and
 have it loaded with the LLM you wish to use."""),
-    ("v", "vertexai", "VertexAI",
-     """Vertex AI is a machine learning (ML) platform that lets you train and deploy
+            ("v", "vertexai", "VertexAI",
+             """Vertex AI is a machine learning (ML) platform that lets you train and deploy
 ML models and AI applications, and customize large language models (LLMs)
 for use in your AI-powered applications. Vertex AI combines data
 engineering, data science, and ML engineering workflows, enabling your teams
 to collaborate using a common toolset and scale your applications using the
 benefits of Google Cloud.""")
-]
+        ]
 
-chunkers = [
-    ("t", "chunker-token", "tiktoken token-aware chunker",
-     """TikToken is a fast byte pair encoding (BPE) tokenizer developed by OpenAI
+class Chunkers(Chooser):
+
+    def __init__(self):
+
+        self.prompt = "Choose a chunker..."
+
+        self.options = [
+            ("t", "chunker-token", "tiktoken token-aware chunker",
+             """TikToken is a fast byte pair encoding (BPE) tokenizer developed by OpenAI
 for use with its models. Designed to be lightweight and efficient, TikToken
 excels in converting text into tokens, which are sequences of numbers that
 models can interpret. It is especially useful for applications where token
 usage must be limited, such as in translation services or text generation."""),
-    ("r", "chunker-recursive", "Recursive character chunker",
-     """This text splitter is a fast, simple chunker for generic text. It tries to
+            ("r", "chunker-recursive", "Recursive character chunker",
+             """This text splitter is a fast, simple chunker for generic text. It tries to
 split at paragraph bounders until the chunks are small enough.  This has the
 effect of trying to keep all paragraphs (and then sentences, and then words)
 together as long as possible, as those would generically seem to be the
 strongest semantically related pieces of text."""),
-     ]
+        ]
 
-vectors = [
-    ("m", "milvus", "Milvus vector store",
-     """Milvus is an open-source vector database built for GenAI
+class VectorStores(Chooser):
+
+    def __init__(self):
+
+        self.prompt = "Choose a vector store..."
+ 
+        self.options = [
+            ("m", "milvus", "Milvus vector store",
+             """Milvus is an open-source vector database built for GenAI
 applications. Install with pip, perform high-speed searches, and scale to
 tens of billions of vectors with minimal performance loss."""),
-]
+        ]
 
-triples = [
-    ("c", "cassandra", "Apache Cassandra",
-     """Cassandra is not a native graph DB, but is a very powerful
+class TripleStores(Chooser):        
+
+    def __init__(self):
+
+        self.prompt = "Choose a triple store..."
+
+        self.options = [
+            ("c", "cassandra", "Apache Cassandra",
+             """Cassandra is not a native graph DB, but is a very powerful
 columnar store.  Trustgraph knows how to drive Cassandra as a graph
 database."""),     
-    ("n", "neo4j", "Neo4j community version",
-     """Neo4j is a simple, popular graph database.  It has an in-built
+            ("n", "neo4j", "Neo4j community version",
+             """Neo4j is a simple, popular graph database.  It has an in-built
 graph query UI to help visualise the graph store."""),
-]
-
-def describe_llm(option):
-    for llm in llms:
-        if option == llm[2]: return llm[3]
-    return "No documentation on {option}"
-
-def list_llms():
-    return [
-        f"[{llm[0]}] {llm[2]}"
-        for llm in llms
-    ]
-
-def describe_chunker(option):
-    for chunker in chunkers:
-        if option == chunker[2]: return chunker[3]
-    return "No documentation on {option}"
-
-def list_chunkers():
-    return [
-        f"[{chunker[0]}] {chunker[2]}"
-        for chunker in chunkers
-    ]
-
-def describe_vector(option):
-    for vector in vectors:
-        if option == vector[2]: return vector[3]
-    return "No documentation on {option}"
-
-def list_vectors():
-    return [
-        f"[{vector[0]}] {vector[2]}"
-        for vector in vectors
-    ]
-
-def describe_triple(option):
-    for triple in triples:
-        if option == triple[2]: return triple[3]
-    return "No documentation on {option}"
-
-def list_triples():
-    return [
-        f"[{triple[0]}] {triple[2]}"
-        for triple in triples
-    ]
+        ]
 
 def main():
 
-    print()
-    print("Select an LLM...")
-    terminal_menu = TerminalMenu(
-        list_llms(),
-        preview_command=describe_llm,
-        preview_size=0.5,
-        preview_title="description",
-    )
-
-    ix = terminal_menu.show()
-
-    llm = llms[ix][1]
-
-    print()
-    print(f"Selected: {llms[ix][2]}")
-
-    print()
-    print("Select a chunker...")
-    terminal_menu = TerminalMenu(
-        list_chunkers(),
-        preview_command=describe_chunker,
-        preview_size=0.5,
-        preview_title="description",
-    )
-
-    ix = terminal_menu.show()
-
-    chunker = chunkers[ix][1]
-
-    print()
-    print(f"Selected: {chunkers[ix][2]}")
-
-    print()
-    print("Select a vector store...")
-    terminal_menu = TerminalMenu(
-        list_vectors(),
-        preview_command=describe_vector,
-        preview_size=0.5,
-        preview_title="description",
-    )
-
-    ix = terminal_menu.show()
-
-    vector = vectors[ix][1]
-
-    print()
-    print(f"Selected: {vectors[ix][2]}")
-
-    print()
-    print("Select a triple store...")
-    terminal_menu = TerminalMenu(
-        list_triples(),
-        preview_command=describe_triple,
-        preview_size=0.5,
-        preview_title="description",
-    )
-
-    ix = terminal_menu.show()
-
-    triple = triples[ix][1]
-
-    print()
-    print(f"Selected: {triples[ix][2]}")
-    print()
+    llm = Llms().choose()
+    chunker = Chunkers().choose()
+    vector = VectorStores().choose()
+    triple = TripleStores().choose()
 
     config = f"""
 local triple = import "components/{triple}.jsonnet";
@@ -243,7 +194,9 @@ std.manifestYamlDoc(config)
 
     print(config)
 
-    resp = process_jsonnet(config)
+    g = Generator()
+
+    resp = g.process_jsonnet(config)
 
     print(resp)
 
