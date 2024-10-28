@@ -17,24 +17,25 @@ Initialization:
       self, log_level=ERROR, subscriber=None, input_queue=None,
       output_queue=None, pulsar_host="pulsar://pulsar:6650")
 
-- `log_level (Optional[int])`: Sets the logging level for the
-  client. Defaults to ERROR.
+  - `log_level (Optional[int])`: Sets the logging level for the
+    client. Defaults to ERROR.
 
-- `subscriber (Optional[str])`: Pulsar subscriber name for receiving
-  responses. Defaults to a system-generated name.
+  - `subscriber (Optional[str])`: Pulsar subscriber name for receiving
+    responses. Defaults to a system-generated name.
 
-- `input_queue (Optional[str])`: Pulsar queue name for sending
-  requests. Defaults to graph_rag_request_queue.
+  - `input_queue (Optional[str])`: Pulsar queue name for sending
+    requests. Defaults to graph_rag_request_queue.
 
-- `output_queue (Optional[str])`: Pulsar queue name for receiving
-  responses. Defaults to graph_rag_response_queue.
+  - `output_queue (Optional[str])`: Pulsar queue name for receiving
+    responses. Defaults to graph_rag_response_queue.
 
-- `pulsar_host (Optional[str])`: Pulsar service hostname and
-  port. Defaults to "pulsar://pulsar:6650".
+  - `pulsar_host (Optional[str])`: Pulsar service hostname and
+    port. Defaults to "pulsar://pulsar:6650".
 
 Methods:
 
-- `request(self, query, user="trustgraph", collection="default", timeout=500) -> GraphRagResponse`
+  `request(self, query, user="trustgraph", collection="default", timeout=500)
+      -> GraphRagResponse`
 
   Sends a RAG query to the GraphRAG service and returns the response.
   
