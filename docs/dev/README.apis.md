@@ -23,21 +23,27 @@ Key Methods:
 
 ## `LlmClient`
 
-    Purpose: Sends text prompts to an LLM service to generate text completions.
-    Key Method:
-        request: Sends a text prompt to the LLM and receives the generated text.
+Purpose: Sends text prompts to an LLM service to generate text completions.
 
-GraphRagClient
+Key Method:
+- `request`: Sends a text prompt to the LLM and receives the generated text.
 
-    Purpose: Sends retrieval-augmented generation (RAG) queries to a GraphRAG service to retrieve information from a knowledge graph.
-    Key Method:
-        request: Sends a RAG query and receives the generated response.
+## `GraphRagClient`
+
+Purpose: Sends retrieval-augmented generation (RAG) queries to a
+GraphRAG service to retrieve information from a knowledge graph.
+
+Key Method:
+- `request`: Sends a RAG query and receives the generated response.
 
 Overall, these APIs enable you to:
 
-    Analyze text for entities, relationships, and topics.
-    Generate text based on prompts and knowledge graphs.
-    Extract structured data from text.
-    Interact with large language models.
+- Analyze text for entities, relationships, and topics.
+- Generate text based on prompts and knowledge graphs.
+- Extract structured data from text.
+- Interact with large language models.
 
-By effectively utilizing these APIs, you can leverage the power of TrustGraph to enhance your applications with advanced text analysis and generation capabilities.
+By effectively utilizing these APIs, you can leverage the power of
+TrustGraph to enhance your applications with advanced text analysis
+and generation capabilities.
+
