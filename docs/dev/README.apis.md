@@ -1,49 +1,30 @@
 
-# TrustGraph API Overview
+# Developing with TrustGraph
 
-TrustGraph provides a suite of APIs to interact with its services,
-including text analysis, entity relationship extraction, and large
-language model interactions. Here's an overview of the key APIs we've
-explored:
+This guide is for developers who want to interact with, or develop services
+for TrustGraph.  You are in one of 2 camps:
 
-## `PromptClient`
-
-Purpose: Sends text chunks to the TrustGraph Prompt service for
-various analysis tasks.
-
-Key Methods:
-
-- `request_definitions`: Extracts definitions for entities in the text.
-- `request_relationships`: Extracts relationships between entities.
-- `request_topics`: Extracts topics discussed in the text.
-- `request_rows`: Extracts data rows from the text based on a schema.
-- `request_kg_prompt`: Generates text based on a query and a knowledge graph.
-- `request_document_prompt: Generates text based on a query and a set of
-  documents.
-
-## `LlmClient`
-
-Purpose: Sends text prompts to an LLM service to generate text completions.
-
-Key Method:
-- `request`: Sends a text prompt to the LLM and receives the generated text.
-
-## `GraphRagClient`
-
-Purpose: Sends retrieval-augmented generation (RAG) queries to a
-GraphRAG service to retrieve information from a knowledge graph.
-
-Key Method:
-- `request`: Sends a RAG query and receives the generated response.
-
-Overall, these APIs enable you to:
-
-- Analyze text for entities, relationships, and topics.
-- Generate text based on prompts and knowledge graphs.
-- Extract structured data from text.
-- Interact with large language models.
-
-By effectively utilizing these APIs, you can leverage the power of
-TrustGraph to enhance your applications with advanced text analysis
-and generation capabilities.
+- You want to work with the services that TrustGraph already provides
+  as a system and want to interact with those services from your
+  application.
+- You want to add processing services to TrustGraph to extend what the
+  system can do.
+  
+You need to understand:
+- Everyone should read an [Overview](trustgraph-overview.md) of how the
+  TrustGraph system hangs together.
+- Everyone should understand how the
+  [service invocation APIs](service-invocation-apis.md) hang
+  together, and which bits of software implement those APIs.
+- If you want to build components to run within TrustGraph you need to
+  understand the [processing component API](process-apis.md)
+  which are the foundation for components.
+- If you want to build components, you should probably read how we 
+  [package and deploy](packaging.md) because, you can go your own way on
+  this, but it may save you a lot of time.
+- Finally, having written new components, if you want the deployment to be
+  slick it's worth understanding how the
+  [templating system](templating.md) works, because
+  this means you can create configurations for your system in the same way
+  we do.
 
