@@ -20,3 +20,11 @@ APIs exist for the following use-cases:
   match an embedding.  This is a low-level API useful for custom
   applications.
 
+> FIXME: Complete
+
+EmbeddingsClient
+GraphEmbeddingsClient
+LlmClient
+PromptClient
+TriplesQueryClient
+
