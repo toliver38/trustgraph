@@ -130,4 +130,7 @@ with Kubernetes.
   though Pulsar.
 - To interact with TrustGraph services you need to interact with Pulsar
   service, and so the Pulsar service needs to be accessible.
-
+- It is possible to interact with TrustGraph services using a variety
+  of technologies, but this documentation will get you started using
+  Python and the Python libraries we publish.
+  
