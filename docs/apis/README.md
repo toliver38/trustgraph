@@ -40,10 +40,10 @@ Cons:
   - Lower coverage of functionality - service interfaces need to be added to
     `api-gateway` to permit REST invocation
 
-### Websocket API
+### Websocket APIs
 
 The `api-gateway` component also provides access to services through a
-websocket API.
+websocket APIs.
 
 Pros:
   - Usable through a standard websocket library
